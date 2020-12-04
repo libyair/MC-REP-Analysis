@@ -32,7 +32,7 @@ def run(path):
     
     cash_flow_calculator = CashFlowCalculator(annual_revenue_mat, params)
 
-    annual_cash_flow = cash_flow_calculator.calc_cash_flow()
+    interest_rate_MC, annual_cash_flow = cash_flow_calculator.calc_cash_flow()
 
     metrics = Metrics(annual_cash_flow, params)
 
@@ -54,15 +54,18 @@ def run(path):
     treshold = 0.02
     prob_lower_then_threshold = sum(irr<treshold for irr in irr_vec)/len(irr_vec)
     print('prob_lower_then_threshold: ',prob_lower_then_threshold)
-
-    res = pd.DataFrame({'irr_vec': irr_vec[~np.isnan(irr_vec)], \
-                        'npv_vec': npv_vec[~np.isnan(irr_vec)], \
-                             'payback_vec':payback_vec[~np.isnan(irr_vec)]})
+    valid_ind = ~np.isnan(irr_vec)
+    print(valid_ind)
+    res = pd.DataFrame({#'price':  price_vec[valid_ind], \
+                        #'interest_rate' : interest_rate_MC[valid_ind], \
+                        'irr_vec': irr_vec[valid_ind], \
+                        'npv_vec': npv_vec[valid_ind], \
+                             'payback_vec':payback_vec[valid_ind]})
                              
     res.to_csv(r'C:\Users\Yair\Documents\Green Ensis\Data\output.csv')
-    if len(res)>1:
-        figure = px.histogram(res, x="irr_vec")
-        figure.show()
+    # if len(res)>1:
+    #     figure = px.histogram(res, x="irr_vec")
+    #     figure.show()
     
 if __name__ == "__main__":
     run()

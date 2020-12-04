@@ -34,7 +34,11 @@ class CashFlowCalculator(object):
             interest_list = np.linspace(self.interest_rate_range[0],self.interest_rate_range[1], 5)
         else:
             interest_list = [self.interest_rate_range]
+        #Record interest rate for the current run
+        interest_rate_MC = np.repeat(interest_list,len(self.revenue))
         for interest_rate in interest_list:
+            
+            
             loan, annual_loan_return, annual_interes_return = self._loan_return_calculator(self.initial_investment,
                                                                                 self.equity_portion, interest_rate)
 
@@ -68,7 +72,7 @@ class CashFlowCalculator(object):
         axes = df[['total__loan_return', 'total__interes_return']].plot.bar(stacked=True)
         axes.legend(loc=2) 
 
-        return annual_cash_flow
+        return interest_rate_MC, annual_cash_flow
 
     def _loan_return_calculator(self, total_investment, equity_portion, interest_rate, grace_period = 12, interest_grace = 6,
                        loan_period = 20, years = 30, yearly_payments =2 ):
