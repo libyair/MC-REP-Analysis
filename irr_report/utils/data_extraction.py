@@ -2,8 +2,11 @@ import pandas as pd
 import sys
 
 class DataExtraction(object):
-    def __init__(self, path):
+    def __init__(self, FIXTURE_DIR):
+       self.db = pd.read_csv(f'{FIXTURE_DIR}\db.csv') 
+       
         
+    def get_params(self, path):
         self.path = path 
         
         try:
@@ -75,9 +78,9 @@ class DataExtraction(object):
             sys.exit(exc)
 
         try: 
-            self.cash_flow_data = pd.read_csv(f'{path}\cash_flow_data.csv')            
+            self.cash_flow_data = pd.read_excel (f'{path}\cash_flow_data.xlsx')            
         except (Exception, KeyboardInterrupt) as exc:
-            print("Error while trying to load cash_flow_data.csv from path: File may not exist in path")
+            print("Error while trying to load cash_flow_data.xlsx from path: File may not exist in Inputh path")
             sys.exit(exc)
 
 

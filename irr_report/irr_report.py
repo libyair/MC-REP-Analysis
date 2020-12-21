@@ -13,9 +13,18 @@ import plotly.express as px
 
 @click.command()
 @click.option('--path', '-p', help="The path to the file and file name containing the data")
-def run(path):
-    params = DataExtraction(path)
-    # print(params.__dict__)
+def run(path=None):
+    
+    #Upload db
+    FIXTURE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),'resources')
+    params = DataExtraction(FIXTURE_DIR)
+    ## Get setting 
+    if not path:
+        run_settings = GetSettings(FIXTURE_DIR, params.db)
+    
+            
+    params.get_params(run_settings.input_path)
+    
     annual_revenue_MC = RevenueCalculator(params.cotract_price_range, params.annual_prod, params.degredation, params.years, params.yeild, \
                                                         params.inflation )
     
@@ -46,8 +55,6 @@ def run(path):
     print('voltality: ', voltality)
     print('mean IRR: ', np.mean(irr_vec[~np.isnan(irr_vec)]))
     print('mean NPV: ', np.mean(npv_vec[~np.isnan(irr_vec)]))
-    print('payback: ', type(payback_vec), payback_vec.shape)
-    print('irr: ' ,type(irr_vec), irr_vec.shape)
     print('mean Payback: ', np.mean(payback_vec[~np.isnan(payback_vec)]))
 
 
@@ -55,14 +62,13 @@ def run(path):
     prob_lower_then_threshold = sum(irr<treshold for irr in irr_vec)/len(irr_vec)
     print('prob_lower_then_threshold: ',prob_lower_then_threshold)
     valid_ind = ~np.isnan(irr_vec)
-    print(valid_ind)
     res = pd.DataFrame({#'price':  price_vec[valid_ind], \
                         #'interest_rate' : interest_rate_MC[valid_ind], \
                         'irr_vec': irr_vec[valid_ind], \
                         'npv_vec': npv_vec[valid_ind], \
                              'payback_vec':payback_vec[valid_ind]})
                              
-    res.to_csv(r'C:\Users\Yair\Documents\Green Ensis\Data\output.csv')
+    res.to_csv(f'{run_settings.output_path}\{run_settings.run_name}_results.csv')
     # if len(res)>1:
     #     figure = px.histogram(res, x="irr_vec")
     #     figure.show()

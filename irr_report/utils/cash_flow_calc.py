@@ -17,7 +17,7 @@ class CashFlowCalculator(object):
     def calc_cash_flow(self):
         columns = ['Total Expenses',
                 'DSRA',
-                'Interest', #VAT 
+                'Interest VAT facility', #VAT 
                 'Taxes', 
                 'Delta Working Capital',
                 'Upfront Fee + Substitute Tax Capex'
