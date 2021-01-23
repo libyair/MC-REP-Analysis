@@ -76,6 +76,21 @@ class DataExtraction(object):
         except (Exception, KeyboardInterrupt) as exc:
             print("Parameter cost_of_capital is missing or from unrecognize type")
             sys.exit(exc)
+        try:
+            self.is_DSRA_requires = inputFile['is_DSRA_requires'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter is_DSRA_requires is missing or from unrecognize type")
+            sys.exit(exc)
+        try:
+            self.DSRA_Year_Start = inputFile['DSRA_Year_Start'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter DSRA_Year_Start is missing or from unrecognize type")
+            sys.exit(exc)
+        try:
+            self.DSRA_period = inputFile['DSRA_period'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter cost_of_capital is missing or from unrecognize type")
+            sys.exit(exc)
 
         try: 
             self.cash_flow_data = pd.read_excel (f'{path}\cash_flow_data.xlsx')            
