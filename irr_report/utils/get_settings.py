@@ -138,8 +138,10 @@ class GetSettings(object):
             'excution_time': [time_str]
         }
         run_dict_df = pd.DataFrame(run_dict)
+        
         self.db = self.db.append(run_dict_df, ignore_index = True)
-        self.db.to_csv(f'{self.FIXTURE_DIR}\db.csv') 
+        
+        self.db.to_csv(f'{self.FIXTURE_DIR}\db.csv', index=False) 
 
     def stop(self):
         sys.exit("Aborted!")

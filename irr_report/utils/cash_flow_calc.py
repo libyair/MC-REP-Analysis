@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
+import math
+from tax_calculator import TaxCalculator
 
 class CashFlowCalculator(object):
 
     def __init__(self, annual_revenue_mat, params ):
+        self.params = params
         self.revenue = annual_revenue_mat
         self.cash_flow_data = params.cash_flow_data
         self.initial_investment = params.initial_investment
@@ -56,11 +59,16 @@ class CashFlowCalculator(object):
             if self.DSRA_period:
                 annual_DSRA = self.DSRA_calculator(annual_loan_return , annual_interes_return)
                 DSRA.append(annual_DSRA)
-                print(DSRA)
+                print('DSRA: ', DSRA)
 
             #calculate cash flow
             self.revenue[0][0] = self.revenue[0][0]+ 29229 #TODO : add this as a parameter
-            # EBIDTA = self.revenue - self.cash_flow_data['Total Expenses'].values.T 
+            
+            tax_calculator = TaxCalculator(self.revenue , self.params)
+            
+            EBIDTA = self.revenue - tax_calculator.total_expenses 
+            taxes = tax_calculator.calc_taxes(EBIDTA)
+
             # operating_cash_flow = EBIDTA - self.cash_flow_data['Taxes'].values.T - self.cash_flow_data['Delta Working Capital'].values.T \
             #                                 - self.cash_flow_data['Upfront Fee + Substitute Tax Capex'].values.T
             
@@ -110,13 +118,19 @@ class CashFlowCalculator(object):
         return loan, annual_loan_return, annual_interes_return
 
     def DSRA_calculator(self, annual_loan_return , annual_interes_return):
-        debt_window = self.self.DSRA_period/12 #Convert month to years
+        debt_window = self.DSRA_period/12 #Convert month to years
         DSRA_balance = []
-        for i in range(len(annual_loan_return)):        
-            annual_balance_win = annual_loan_return[i:i+math.ceil(debt_window)]
-            annual_balance = sum(annual_balance_win[0:len(annual_balance_win)-1]) + annual_balance_win[-1]*(debt_window-int(debt_window))
+        for i in range(len(annual_loan_return)): 
+            print(i)
+            annual_debt = annual_loan_return + annual_interes_return            
+            if i < len(annual_loan_return)-1:
+                annual_balance_win = annual_debt[i+1:i+1+math.ceil(debt_window)]
+                annual_balance = sum(annual_balance_win[0:len(annual_balance_win)-1]) + \
+                                annual_balance_win[-1]*(debt_window-int(debt_window))
+            else: 
+                annual_balance = 0
             DSRA_balance.append(annual_balance)
-            
+        print('DSRA_balance: ', DSRA_balance)    
         DSRA = np.append(np.array(DSRA_balance[0]), np.diff(DSRA_balance))
         return DSRA 
 

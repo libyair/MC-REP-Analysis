@@ -3,7 +3,15 @@ import sys
 
 class DataExtraction(object):
     def __init__(self, FIXTURE_DIR):
-       self.db = pd.read_csv(f'{FIXTURE_DIR}\db.csv') 
+        try:
+            self.db = pd.read_csv(f'{FIXTURE_DIR}\db.csv') 
+        except Exception:
+            self.db = pd.DataFrame({'id':[], 
+                                    'run_name':[],
+                                    'input_path':[],
+                                    'output_path':[],
+                                    'excution_time':[]
+                                    })
        
         
     def get_params(self, path):
@@ -89,14 +97,117 @@ class DataExtraction(object):
         try:
             self.DSRA_period = inputFile['DSRA_period'].values[0]
         except (Exception, KeyboardInterrupt) as exc:
-            print("Parameter cost_of_capital is missing or from unrecognize type")
+            print("Parameter DSRA_period is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.VAT = inputFile['VAT'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter VAT is missing or from unrecognize type")
+            sys.exit(exc)
+        
+        try:
+            self.VAT_loan_interest_rate = inputFile['VAT_loan_interest_rate'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter VAT_loan_interest_rate is missing or from unrecognize type")
+            sys.exit(exc)
+        
+        try:
+            self.DSRA_period = inputFile['VAT_loan_return_period'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter VAT_loan_return_period is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.Depreciation_period = inputFile['Depreciation_period'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter Depreciation_period is missing or from unrecognize type")
+            sys.exit(exc)
+        
+        try:
+            self.Depreciation = inputFile['Depreciation'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter Depreciation is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.Corporate_Tax = inputFile['Corporate_Tax'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter Corporate_Tax is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.number_active_days_year_1 = inputFile['number_active_days_year_1'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter number_active_days_year_1 is missing or from unrecognize type")
+            sys.exit(exc)
+        
+        try:
+            self.total_number_days_year_1 = inputFile['total_number_days_year_1'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter total_number_days_year_1 is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.number_active_days_last_year = inputFile['number_active_days_year_1'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter number_active_days_year_1 is missing or from unrecognize type")
+            sys.exit(exc)
+        
+        try:
+            self.total_number_days_last_year = inputFile['total_number_days_year_1'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter total_number_days_year_1 is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.lease = inputFile['lease'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter lease is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.OandM = inputFile['OandM'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter OandM is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.insurance = inputFile['insurance'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter insurance is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.inverter_reserve = inputFile['inverter_reserve'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter inverter_reserve is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.asset_management = inputFile['asset_management'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter asset_management is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.bank_agency_fees_and_others = inputFile['bank_agency_fees_and_others'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter bank_agency_fees_and_others is missing or from unrecognize type")
+            sys.exit(exc)
+
+        try:
+            self.percent_EBITDA_for_corp_tax = inputFile['percent_EBITDA_for_corp_tax'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter percent_EBITDA_for_corp_tax is missing or from unrecognize type")
             sys.exit(exc)
 
         try: 
-            self.cash_flow_data = pd.read_excel (f'{path}\cash_flow_data.xlsx')            
+            self.cash_flow_data = pd.read_csv(f'{path}\cash_flow_data.csv')            
         except (Exception, KeyboardInterrupt) as exc:
-            print("Error while trying to load cash_flow_data.xlsx from path: File may not exist in Inputh path")
+            print("Error while trying to load cash_flow_data.csv from path: File may not exist in Inputh path")
             sys.exit(exc)
+        
 
 
 
