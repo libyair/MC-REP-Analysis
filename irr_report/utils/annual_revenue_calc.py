@@ -44,7 +44,7 @@ class RevenueCalculator(object):
             capacity_vec[i] = capacity_vec[i-1]-capacity_vec[i-1]*self.degredation
             
             if contract=='agreement':
-                price_mat[:,i] = price_mat[:,i-1]+price_mat[:,i-1]*self.inflation
+                price_mat[:,i] = price_mat[:,i-1]+price_mat[:,i-1]*0#*self.inflation
             elif contract == 'open_market':
                 #TODO - Complete logic here
                 break

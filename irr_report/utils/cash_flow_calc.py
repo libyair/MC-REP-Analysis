@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
 import math
-from tax_calculator import TaxCalculator
+from .tax_calculator import TaxCalculator
 
 class CashFlowCalculator(object):
 
-    def __init__(self, annual_revenue_mat, params ):
+    def __init__(self, annual_revenue_mat, price_vec, params ):
         self.params = params
         self.revenue = annual_revenue_mat
-        self.cash_flow_data = params.cash_flow_data
+        self.price_vec = price_vec
         self.initial_investment = params.initial_investment
         self.equity_portion = params.equity_portion
         self.interest_rate_range = params.interest_rate_range
@@ -22,28 +22,22 @@ class CashFlowCalculator(object):
 
         
     def calc_cash_flow(self):
-        columns = ['Total Expenses',
-                # 'DSRA',
-                'Interest VAT facility', #VAT 
-                'Taxes', 
-                'Delta Working Capital',
-                'Upfront Fee + Substitute Tax Capex'
-                ]
-        costs = self.cash_flow_data[columns].sum(axis=1)
+        
         loan_vec = []
         annual_loan_return_mat = []
         total__loan_return = []
         annual_interes_return_mat = []
         total__interes_return = [] 
+        total_taxes = []
         DSRA = []
         annual_cash_flow = []
-        zero_cash_flow = []
         if self.interest_list:
             interest_list = np.linspace(self.interest_rate_range[0],self.interest_rate_range[1], 5)
         else:
             interest_list = [self.interest_rate_range]
         #Record interest rate for the current run
         interest_rate_MC = np.repeat(interest_list,len(self.revenue))
+        res = {}
         for interest_rate in interest_list:
             
             
@@ -59,37 +53,51 @@ class CashFlowCalculator(object):
             if self.DSRA_period:
                 annual_DSRA = self.DSRA_calculator(annual_loan_return , annual_interes_return)
                 DSRA.append(annual_DSRA)
-                print('DSRA: ', DSRA)
 
             #calculate cash flow
-            self.revenue[0][0] = self.revenue[0][0]+ 29229 #TODO : add this as a parameter
             
-            tax_calculator = TaxCalculator(self.revenue , self.params)
+            tax_calculator = TaxCalculator(self.revenue , annual_interes_return, self.params)
             
             EBIDTA = self.revenue - tax_calculator.total_expenses 
-            taxes = tax_calculator.calc_taxes(EBIDTA)
+            annual_corp_tax = tax_calculator.calc_taxes(EBIDTA)
+            total_taxes.append(sum(annual_corp_tax))
 
-            # operating_cash_flow = EBIDTA - self.cash_flow_data['Taxes'].values.T - self.cash_flow_data['Delta Working Capital'].values.T \
-            #                                 - self.cash_flow_data['Upfront Fee + Substitute Tax Capex'].values.T
-            
-            # Cash_Flow_Available_after_VAT = operating_cash_flow - self.cash_flow_data['Interest'].values.T
-            # Cash_Flow_Available_for_Loans = Cash_Flow_Available_after_VAT - self.cash_flow_data['DSRA'].values.T
+            UpfrontFee_Substitute_TaxCapex = tax_calculator.vat_interest_vec
+            delta_working_capital = self.calc_delta_working_capital(self.revenue, \
+                tax_calculator.total_expenses , self.params)
 
-            costs = costs + annual_loan_return + annual_interes_return + annual_DSRA
-            costs = costs.T
-            annual_cash_flow_i = self.revenue-costs.values
+            ## Calculate total costs to be reduced from revenue
+            costs = annual_loan_return + annual_interes_return + annual_DSRA + \
+                annual_corp_tax + tax_calculator.total_expenses + delta_working_capital + UpfrontFee_Substitute_TaxCapex
+            annual_cash_flow_i = self.revenue-costs#.values
             annual_cash_flow_i = np.clip(annual_cash_flow_i, a_min=0, a_max =None)
             annual_cash_flow.append(annual_cash_flow_i)
+
+            ## update results
+            for i,price in enumerate(self.price_vec):
+                res[f'interset_{str(interest_rate)}_price_{price}'] = { 
+                    'Annual_revenue':self.revenue[i],
+                    'OPEX': tax_calculator.total_expenses,\
+                    'Annual_loan_return': annual_loan_return, \
+                    'Annual_interes_return': annual_interes_return,
+                    'Annual_DSRA': annual_DSRA,
+                    'Annual_corp_tax': annual_corp_tax, 
+                    'Annual_cash_flow': annual_cash_flow_i[i]
+
+            }
           
         df = pd.DataFrame( {'interest_list':interest_list, 
                             'total__loan_return': total__loan_return, 
                             'total__interes_return':total__interes_return,
-                            'loan_val':loan_vec}, index=interest_list)
+                            'loan_val':loan_vec, 
+                            'total_taxes': total_taxes
+                                                        }, index=interest_list)
+                            
         
         axes = df[['total__loan_return', 'total__interes_return']].plot.bar(stacked=True)
         axes.legend(loc=2) 
 
-        return interest_rate_MC, annual_cash_flow
+        return interest_rate_MC, annual_cash_flow, res
 
     def _loan_return_calculator(self, total_investment, equity_portion, interest_rate, grace_period = 12, interest_grace = 6,
                        loan_period = 20, years = 30, yearly_payments =2 ):
@@ -121,7 +129,6 @@ class CashFlowCalculator(object):
         debt_window = self.DSRA_period/12 #Convert month to years
         DSRA_balance = []
         for i in range(len(annual_loan_return)): 
-            print(i)
             annual_debt = annual_loan_return + annual_interes_return            
             if i < len(annual_loan_return)-1:
                 annual_balance_win = annual_debt[i+1:i+1+math.ceil(debt_window)]
@@ -130,9 +137,16 @@ class CashFlowCalculator(object):
             else: 
                 annual_balance = 0
             DSRA_balance.append(annual_balance)
-        print('DSRA_balance: ', DSRA_balance)    
         DSRA = np.append(np.array(DSRA_balance[0]), np.diff(DSRA_balance))
         return DSRA 
 
 
-        
+    def calc_delta_working_capital(self, revenue_mat, expenses, params ):
+        delta_working_capital_mat = []
+        for revenue in revenue_mat:
+            recivable = revenue*(params.recivable_sales_cycle/365)
+            payable = expenses*(params.payable_sales_cycle/365)
+            net_delta_working_capital = recivable - payable
+            delta_working_capital = np.append(net_delta_working_capital[0], np.diff(net_delta_working_capital))
+            delta_working_capital_mat.append(delta_working_capital)
+        return delta_working_capital_mat

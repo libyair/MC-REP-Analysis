@@ -113,7 +113,7 @@ class DataExtraction(object):
             sys.exit(exc)
         
         try:
-            self.DSRA_period = inputFile['VAT_loan_return_period'].values[0]
+            self.VAT_loan_return_period = inputFile['VAT_loan_return_period'].values[0]
         except (Exception, KeyboardInterrupt) as exc:
             print("Parameter VAT_loan_return_period is missing or from unrecognize type")
             sys.exit(exc)
@@ -202,12 +202,23 @@ class DataExtraction(object):
             print("Parameter percent_EBITDA_for_corp_tax is missing or from unrecognize type")
             sys.exit(exc)
 
-        try: 
-            self.cash_flow_data = pd.read_csv(f'{path}\cash_flow_data.csv')            
+        try:
+            self.vat_substitute_tax = inputFile['vat_substitute_tax'].values[0]
         except (Exception, KeyboardInterrupt) as exc:
-            print("Error while trying to load cash_flow_data.csv from path: File may not exist in Inputh path")
+            print("Parameter vat_substitute_tax is missing or from unrecognize type")
             sys.exit(exc)
         
+        try:
+            self.recivable_sales_cycle = inputFile['recivable_sales_cycle'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter recivable_sales_cycle is missing or from unrecognize type")
+            sys.exit(exc)
+        
+        try:
+            self.payable_sales_cycle = inputFile['payable_sales_cycle'].values[0]
+        except (Exception, KeyboardInterrupt) as exc:
+            print("Parameter payable_sales_cycle is missing or from unrecognize type")
+            sys.exit(exc)        
 
 
 

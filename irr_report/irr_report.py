@@ -39,11 +39,13 @@ def run(path=None):
     
     annual_revenue_mat = annual_revenue_MC.annual_revenue(price_vec, contract='agreement', plot=True)
     
-    cash_flow_calculator = CashFlowCalculator(annual_revenue_mat, params)
+    cash_flow_calculator = CashFlowCalculator(annual_revenue_mat, price_vec, params)
 
-    interest_rate_MC, annual_cash_flow = cash_flow_calculator.calc_cash_flow()
+    interest_rate_MC, annual_cash_flow, annual_res = cash_flow_calculator.calc_cash_flow()
 
     metrics = Metrics(annual_cash_flow, params)
+    
+
 
     irr_vec , npv_vec, payback_vec, no_payback_count = metrics.metrics_calculator()
     # print(irr_vec, npv_vec, payback_vec)
@@ -72,6 +74,10 @@ def run(path=None):
     # if len(res)>1:
     #     figure = px.histogram(res, x="irr_vec")
     #     figure.show()
-    
+    if len(annual_res)==1:
+        for key in annual_res:
+            cur_file = pd.DataFrame(annual_res[key])
+            cur_file.to_csv(f'{run_settings.output_path}\{run_settings.run_name}_annual_calculation.csv')
+
 if __name__ == "__main__":
     run()
