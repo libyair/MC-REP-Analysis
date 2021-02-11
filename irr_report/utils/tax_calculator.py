@@ -28,7 +28,7 @@ class TaxCalculator(object):
                 total_depreciation - deductable_interest).clip(min=0)
             annual_corp_tax = annual_corp_tax_base*self.params.Corporate_Tax
             annual_corp_tax_mat.append(annual_corp_tax)
-        return np.array(annual_corp_tax)
+        return np.array(annual_corp_tax), total_depreciation
         
     
     def plant_depreciation_calculator(self):

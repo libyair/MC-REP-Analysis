@@ -21,7 +21,7 @@ class GetSettings(object):
         # self.window['bg'] = 'snow'
         self.window.geometry("550x200")
         # rename the title of the window
-        self.window.title("Greenennsis - Market analysis software")
+        self.window.title("green enesys - Project value analysis software")
         self.window.eval('tk::PlaceWindow . center')
 
 

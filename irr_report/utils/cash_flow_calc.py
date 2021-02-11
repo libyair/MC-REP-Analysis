@@ -59,7 +59,7 @@ class CashFlowCalculator(object):
             tax_calculator = TaxCalculator(self.revenue , annual_interes_return, self.params)
             
             EBIDTA = self.revenue - tax_calculator.total_expenses 
-            annual_corp_tax = tax_calculator.calc_taxes(EBIDTA)
+            annual_corp_tax, total_depreciation = tax_calculator.calc_taxes(EBIDTA)
             total_taxes.append(sum(annual_corp_tax))
 
             UpfrontFee_Substitute_TaxCapex = tax_calculator.vat_interest_vec
@@ -69,23 +69,29 @@ class CashFlowCalculator(object):
             ## Calculate total costs to be reduced from revenue
             costs = annual_loan_return + annual_interes_return + annual_DSRA + \
                 annual_corp_tax + tax_calculator.total_expenses + delta_working_capital + UpfrontFee_Substitute_TaxCapex
-            annual_cash_flow_i = self.revenue-costs#.values
+            annual_cash_flow_i = self.revenue-costs
             annual_cash_flow_i = np.clip(annual_cash_flow_i, a_min=0, a_max =None)
             annual_cash_flow.append(annual_cash_flow_i)
+            print('delta_working_capital: ', delta_working_capital)
+            print('delta_working_capital: ', costs)
 
             ## update results
             for i,price in enumerate(self.price_vec):
                 res[f'interset_{str(interest_rate)}_price_{price}'] = { 
                     'Annual_revenue':self.revenue[i],
-                    'OPEX': tax_calculator.total_expenses,\
-                    'Annual_loan_return': annual_loan_return, \
+                    'OPEX': tax_calculator.total_expenses,
+                    'Annual_loan_return': annual_loan_return, 
                     'Annual_interes_return': annual_interes_return,
                     'Annual_DSRA': annual_DSRA,
                     'Annual_corp_tax': annual_corp_tax, 
-                    'Annual_cash_flow': annual_cash_flow_i[i]
+                    'Delta_working_capital': delta_working_capital[i],
+                    'UpfrontFee_and_Substitute_TaxCapex': UpfrontFee_Substitute_TaxCapex,
+                    'Cash Flow Available for Dividends': annual_cash_flow_i[i]
 
-            }
-          
+                    }
+                for key in res[f'interset_{str(interest_rate)}_price_{price}']:
+                    print(key, ': ', len(res[f'interset_{str(interest_rate)}_price_{price}'][key]))
+
         df = pd.DataFrame( {'interest_list':interest_list, 
                             'total__loan_return': total__loan_return, 
                             'total__interes_return':total__interes_return,
