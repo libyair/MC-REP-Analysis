@@ -9,6 +9,7 @@ import io
 import base64
 import pandas as pd
 import dash_table
+import flask
 
 
 run_name_input = dbc.FormGroup(
@@ -104,6 +105,7 @@ def add_input_collection(input_value, div_children):
     div_children.append(new_child)
     return div_children
 
+
 ## Handleing getting a file
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
@@ -134,9 +136,12 @@ def parse_contents(contents, filename, date):
         ),
 
         html.Hr(),  # horizontal line
+        dcc.Link(
+            dbc.Button("Submit", id='submit-val', color="primary", className="mr-1"),
+            href='/results')
 
     ])
-
+## Takes input from file uploader and call pareser to read data
 @app.callback(Output('output-data-upload', 'children'),
               Input('upload-data', 'contents'),
               State('upload-data', 'filename'),
@@ -147,6 +152,8 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
             zip(list_of_contents, list_of_names, list_of_dates)]
         return children
 
+
+
 layout = dbc.Container(
     [
         html.H1("Create New Run"),
@@ -154,6 +161,6 @@ layout = dbc.Container(
         setting_form,
         html.Div(id='container', children = [])        
     ],
-    fluid=True,
+    fluid=True
 )
 

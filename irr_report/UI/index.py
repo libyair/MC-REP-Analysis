@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 from app import app
 from app import server
 
-from apps import new_run, run_history
+from apps import new_run, run_history, results
 
 # LOGO = r"C:\Users\talz\OneDrive\Documents\Yair\greenennesis\MC-REP-Analysis\irr_report\resources\logo.png"
 LOGO = 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fin.linkedin.com%2Fcompany%2Fgreenenesysgroup&psig=AOvVaw0nKxnBBs2-HBf4EYdsNQvE&ust=1614404958930000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCJjSsLvthu8CFQAAAAAdAAAAABAD'
@@ -24,6 +24,7 @@ search_bar = dbc.Row(
 )
 
 ## Upper Nav bar
+
 navbar = dbc.Navbar(
     [
         html.A(
@@ -43,6 +44,7 @@ navbar = dbc.Navbar(
     ],
     color="dark",
     dark=True,
+    sticky = 'top'
 )
 
 
@@ -92,6 +94,8 @@ def render_page_content(pathname):
         return new_run.layout
     elif pathname == "/run_history":
         return run_history.layout
+    elif pathname == "/results":
+        return results.layout
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [
