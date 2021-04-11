@@ -50,30 +50,33 @@ class CashFlowCalculator(object):
             annual_interes_return_mat.append(annual_interes_return)
             total__interes_return.append(sum(annual_interes_return))
 
-            if self.DSRA_period:
-                annual_DSRA = self.DSRA_calculator(annual_loan_return , annual_interes_return)
+            if self.is_DSRA_requires:
+                annual_DSRA = self.DSRA_calculator(annual_loan_return, annual_interes_return)
                 DSRA.append(annual_DSRA)
+            else:
+                annual_DSRA = np.zeros(self.params.years)
 
             #calculate cash flow
             
-            tax_calculator = TaxCalculator(self.revenue , annual_interes_return, self.params)
+            tax_calculator = TaxCalculator(self.revenue, annual_interes_return, self.params)
             
             EBIDTA = self.revenue - tax_calculator.total_expenses 
             annual_corp_tax, total_depreciation = tax_calculator.calc_taxes(EBIDTA)
             total_taxes.append(sum(annual_corp_tax))
 
             UpfrontFee_Substitute_TaxCapex = tax_calculator.vat_interest_vec
-            delta_working_capital = self.calc_delta_working_capital(self.revenue, \
-                tax_calculator.total_expenses , self.params)
+            delta_working_capital = self.calc_delta_working_capital(self.revenue,
+                                        tax_calculator.total_expenses, self.params)
 
             ## Calculate total costs to be reduced from revenue
             costs = annual_loan_return + annual_interes_return + annual_DSRA + \
                 annual_corp_tax + tax_calculator.total_expenses + delta_working_capital + UpfrontFee_Substitute_TaxCapex
+
             annual_cash_flow_i = self.revenue-costs
             annual_cash_flow_i = np.clip(annual_cash_flow_i, a_min=0, a_max =None)
             annual_cash_flow.append(annual_cash_flow_i)
-            print('delta_working_capital: ', delta_working_capital)
-            print('delta_working_capital: ', costs)
+            # print('delta_working_capital: ', delta_working_capital)
+            # print('delta_working_capital: ', costs)
 
             ## update results
             for i,price in enumerate(self.price_vec):

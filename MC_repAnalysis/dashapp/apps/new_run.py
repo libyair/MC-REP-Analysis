@@ -8,6 +8,9 @@ import base64
 import pandas as pd
 import dash_table
 import flask
+import os
+from .data_handler import get_params
+import json
 
 def new_run_layout(dash_app):
     run_name_input = dbc.FormGroup(
@@ -41,7 +44,7 @@ def new_run_layout(dash_app):
         row=True
     )
 
-    setting_form = dbc.Form( [
+    setting_form = dbc.FormGroup( [
         dbc.Row(
             [run_name_input], 
             align="center"
@@ -51,14 +54,14 @@ def new_run_layout(dash_app):
         ) 
     ] )
 
-  
-
     layout = dbc.Container(
         [
             html.H1("Create New Run"),
             html.Hr(),
             setting_form,
-            html.Div(id='container', children = [])        
+            html.Div(id='container', children = []),
+            html.Div(id='params_value', style={'display': 'none'}),
+            html.Div(id='submit_button_container', style={'display': 'none'})
         ],
         fluid=True
     )
@@ -87,7 +90,7 @@ crate_file_uploader = html.Div([
     html.Div(id='output-data-upload')
     ])
 
-create_params_form= dbc.FormGroup(
+create_params_form = dbc.FormGroup(
     [
         dbc.Label("Get data:", html_for="get-data-row", width=4),
         dbc.Col(
@@ -112,59 +115,40 @@ def parse_contents(contents, filename, date):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
+            
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
+        else:
+            raise ValueError
     except Exception as e:
         print(e)
-        return html.Div([
-            'There was an error processing this file.'
+        return None, html.Div([
+            'Unsupported file format.'
         ])
+    else:
+        json_params, missing_params = get_params(df)
+        print(missing_params)
+        if len(missing_params) > 0:
+            #Found missing param - return error
+            erorString = 'The following params are missing: \n '
+            for param in missing_params:
+                erorString = erorString + param + '\n'
+            return None, html.Div([erorString])
+        return json_params, html.Div([
+            html.H5(filename),
+            html.H6(datetime.datetime.fromtimestamp(date)),
 
-    return html.Div([
-        html.H5(filename),
-        html.H6(datetime.datetime.fromtimestamp(date)),
+            dash_table.DataTable(
+                data=df.to_dict('records'),
+                columns=[{'name': i, 'id': i} for i in df.columns],
+                style_table={'overflowX': 'scroll'}
+            ),
 
-        dash_table.DataTable(
-            data=df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df.columns], 
-            style_table={'overflowX': 'scroll'}
-        ),
+            html.Hr(),  # horizontal line
+            dbc.Button("Submit", id='submit-val', color="primary", className="mr-1", n_clicks=0)
+            # dcc.Link(
+            #     dbc.Button("Submit", id='submit-val', color="primary", className="mr-1",  n_clicks=0),
+            #     href='/results')
 
-        html.Hr(),  # horizontal line
-        dcc.Link(
-            dbc.Button("Submit", id='submit-val', color="primary", className="mr-1"),
-            href='/results')
-
-    ])
-
-
-# def init_new_run_callbacks(dash_app):
-#             ## Takes input from file uploader and call pareser to read data
-#     @dash_app.callback(Output('output-data-upload', 'children'),
-#                 Input('upload-data', 'contents'),
-#                 State('upload-data', 'filename'),
-#                 State('upload-data', 'last_modified'))
-#     def update_output(list_of_contents, list_of_names, list_of_dates):
-#         if list_of_contents is not None:
-#             children = [parse_contents(c, n, d) for c, n, d in
-#                 zip(list_of_contents, list_of_names, list_of_dates)]
-#             return children
-
-
-#     ## dinamically add menues
-#     @dash_app.callback(
-#         Output('container', 'children'),
-#         [Input('get-input-row', 'value')],
-#         [State('container', 'children')])
-#     def add_input_collection(input_value, div_children):
-#         div_children = []
-#         new_child = html.Div([])
-#         if input_value == 'upload':
-#             new_child = html.Div([crate_file_uploader])
-#         elif input_value == 'form':
-#             new_child = html.Div([create_params_form])
-
-#         div_children.append(new_child)
-#         return div_children
-    
+        ])

@@ -6,7 +6,11 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from .apps import new_run, run_history, results
 from .apps.new_run import parse_contents, create_params_form, crate_file_uploader
-
+import json
+from subprocess import call, Popen
+from .apps.data_handler import *
+from flask import request
+import os
 
 VALID_USERNAME_PASSWORD_PAIRS = {
     'hello': 'world'
@@ -102,7 +106,7 @@ def init_app(server):
     dash_app.layout = html.Div([dcc.Location(id="url"),navbar , sidebar, content ])
 
     init_callbacks(dash_app)
-    return  dash_app.server
+    return dash_app.server
 
 
 def init_callbacks(dash_app):
@@ -127,18 +131,25 @@ def init_callbacks(dash_app):
         )
     
     ## Takes input from file uploader and call pareser to read data
-    @dash_app.callback(Output('output-data-upload', 'children'),
-                Input('upload-data', 'contents'),
-                State('upload-data', 'filename'),
-                State('upload-data', 'last_modified'))
+    @dash_app.callback([Output('params_value', 'params'),
+                       Output('output-data-upload', 'children')],
+                       Input('upload-data', 'contents'),
+                        State('upload-data', 'filename'),
+                        State('upload-data', 'last_modified'))
     def update_output(list_of_contents, list_of_names, list_of_dates):
         if list_of_contents is not None:
-            children = [parse_contents(c, n, d) for c, n, d in
-                zip(list_of_contents, list_of_names, list_of_dates)]
-            return children
+            for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+                json_params, data_table = parse_contents(c, n, d)
 
-
-    ## dinamically add menues
+            children = [data_table]
+            if json_params:
+                return json.dumps(json_params, default=convert), children
+            else:
+                return '', children
+        else:
+            return '', ''
+            
+    # dynamically add menus
     @dash_app.callback(
         Output('container', 'children'),
         [Input('get-input-row', 'value')],
@@ -153,3 +164,34 @@ def init_callbacks(dash_app):
 
         div_children.append(new_child)
         return div_children
+
+    @dash_app.callback(
+        Output('submit_button_container', 'children'),
+        [Input('submit-val', 'n_clicks'),
+         Input('params_value', 'params'),
+         Input('run-name-row', 'value')])
+    def submit_run(n_clicks, params, value):
+        if n_clicks > 0:
+            # Don't run unless the button has been pressed...
+            ## create json:
+            print(value)
+            data = {
+                'name': value,
+                'params': params,
+                'creator': request.authorization['username']
+            }
+
+            id = update_db(data)
+
+            #activate script using id
+            cwd = os.getcwd()
+            p = Popen(["irr_report_env/Scripts/python",
+                       f"{cwd}\MC_repAnalysis\irr_report\irr_report.py",
+                       f"--id", str(id)
+                       ])
+            # Load your output file with "some code"
+            # output_content = some_loading_function('output file')
+            #
+            #     # Now return.
+            # return output_content
+
