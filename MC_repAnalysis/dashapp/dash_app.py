@@ -5,7 +5,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from .apps import new_run, run_history, results
-from .apps.new_run import parse_contents, create_params_form, crate_file_uploader
+from .apps.new_run import parse_contents, create_section_form, create_param_row, crate_file_uploader, create_params_form
 from .apps.results import load_annual_table, display_metrics, display_cash_flow, display_params
 from .apps.run_history import split_filter_part
 import json
@@ -17,7 +17,7 @@ import os
 from dash_extensions.snippets import send_data_frame
 
 VALID_USERNAME_PASSWORD_PAIRS = {
-    'hello': 'world'
+    'yair': '12345'
 }
 
 
@@ -381,5 +381,46 @@ def init_callbacks(dash_app):
 
         return
 
-
+# section_dict = {
+#     "Basic system params":[('annual_production_capacity','Annual Production Capacity'),
+#                            ('contract_tarrif_range', 'Contract Tariff'),
+#                            ('production_degredeation', 'Production Degradation'),
+#                             ('project_years', 'Project Duration'),
+#                             ('yeild', 'Yield'),
+#                            ('initial_investment', 'Initial Investment')],
+#     "Depreciation & Taxes":[
+#         ('Corporate_tax','Corporate Tax'),
+#         ('Depreciation_period', 'Depreciation Period'),
+#         ('Depreciation', 'Depreciation'),
+#         ('Corporate_Tax', 'Corporate Tax'),
+#         ('number_active_days_year_1', 'Number Active_Days Year_1'),
+#         ('total_number_days_year_1', 'Total Number Days Year 1'),
+#         ('number_active_days_last_year', 'Number Active Days Last Year'),
+#         ('total_number_days_last_year', 'Total Number Days Last Year'),
+#         ('substitute_tax', 'substitute tax'),
+#         ('percent_EBITDA_for_corp_tax', 'Percent EBITDA for Corporate Tax'),
+#         ('vat_substitute_tax', 'VAT substitute Tax'),
+#         ('recivable_sales_cycle', 'Receivable Sales Cycle [days]'),
+#         ('payable_sales_cycle', 'Payable Sales Cycle [days]')
+#     ],
+#     "Operational Expenses": [('inflation','Inflation'),
+#                              ('VAT', 'VAT'),
+#                              ('lease', 'Lease [Euro/kWp]'),
+#                              ('OandM' 'O&M [Euro/kWp]'),
+#                              ('insurance', 'Insurance [Euro/kWp]'),
+#                              ('inverter_reserve', 'Inverter Reserve [Euro/kWp]'),
+#                              ('asset_management', 'Asset Management [Euro/kWp]'),
+#                              ('bank_agency_fees_and_others', 'Bank Agency Fees and Others [Euro/kWp]]')
+#                              ],
+#
+#     "Financing": [("equity_portion", 'Equity Portion'),
+#                   ('interest_rate_range', 'Interest Rate'),
+#                     ('VAT_loan_interest_rate', 'VAT Loan Interest Rate'),
+#                     ('VAT_loan_return_period','VAT Loan Return Period'),
+#                   # ('interest_diff', 'interest_diff')
+#                     ('cost_of_capital', 'Cost of Capital'),
+#                     ('is_DSRA_requires', 'Is DSRA Requires'),
+#                     ('DSRA_Year_Start', 'DSRA Year Start'),
+#                   ('DSRA_period', 'DSRA Period'),
+#                   ]
 

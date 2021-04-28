@@ -157,39 +157,48 @@ section_dict = {
                   ]
 }
 
-def create_param_row():
-    pass
 
-def create_section_form(section, section_dict):
-    section_params = [create_param_row(param) for param in section_dict[section] ]
-    return [
-        html.H5(f'{section}:'),
-        dbc.Row(
-        [
-        dbc.Col(
-            dbc.FormGroup(
-                dbc.Label("")
-                dbc.Input(type="get_data", id="get-data-row", placeholder="Enter number")
-            )
+def create_param_row(param):
+    print('here2')
+    return [dbc.Row(
+        [dbc.FormGroup([
+            dbc.Label(f"{param[1]}"),
+            dbc.Input(type="number", id=f"get-{param[0]}-row")]
+        )]
+    )]
 
-            width=10,  align="center"
-        ]
-    [
-        dbc.Label("Get data:", html_for="get-data-row", width=4),
 
-        ),
+def create_section_form(section):
+    print('here1')
+    return [dbc.Row(
+        [dbc.FormGroup([
+            dbc.Label(f"{param[1]}"),
+            dbc.Input(type="number", id=f"get-{param[0]}-row")]
+        )]
+    ) for param in section_dict[section]]
 
-    ],
-    row=True
+# # [html.H5(f'{section}:')]
+# create_params_form = 0
+# dbc.Form(
+#     [
+
+create_params_form = dbc.Form([
+    dbc.Col([
+        html.H5('Financing'),
+        dbc.Row([
+            dbc.FormGroup([
+                dbc.Label(f"Annual Production Capacity"),
+                dbc.Input(type="number", id=f"get-annual-production-capacity-row")]
+                )
+            ]
+        )
+      ]
+     )
+  ]
 )
 
 
-create_params_form = dbc.Form(
-    [create_section_form(section, section_dict ) for section in  section_dict.keys() ])
 
-
-
-    
 ## Handleing getting a file
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')

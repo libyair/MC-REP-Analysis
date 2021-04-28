@@ -12,6 +12,7 @@ def run_history_layout(dash_app):
 
     user_name = request.authorization['username']
     df = get_run_history_data(user_name)
+
     PAGE_SIZE = 20
 
     CONTENT_STYLE = {
