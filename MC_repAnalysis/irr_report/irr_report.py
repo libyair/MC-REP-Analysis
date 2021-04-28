@@ -85,15 +85,18 @@ class Calculations:
                 'npv_vec': list(npv_vec[valid_ind]),
                 'payback_vec': list(payback_vec[valid_ind]),
                 'prob_lower_then_threshold': prob_lower_then_threshold,
-                'voltality': voltality,
-                'mean IRR': np.mean(irr_vec[~np.isnan(irr_vec)]),
-                'mean NPV': np.mean(npv_vec[~np.isnan(irr_vec)]),
-                'mean Payback': np.mean(payback_vec[~np.isnan(payback_vec)])
+                'volatility': voltality,
+                'mean_IRR': np.mean(irr_vec[~np.isnan(irr_vec)]),
+                'mean_NPV': np.mean(npv_vec[~np.isnan(irr_vec)]),
+                'mean_payback': np.mean(payback_vec[~np.isnan(payback_vec)])
             }
 
             # Update mc flag
             if len(annual_res) > 1:
                 mc = True
+            else:
+                print('annual_res: ', annual_res)
+                res['annual_results'] = annual_res[list(annual_res.keys())[0]]
 
             return res, mc
 
@@ -110,3 +113,4 @@ class Calculations:
 
 if __name__ == "__main__":
     run()
+

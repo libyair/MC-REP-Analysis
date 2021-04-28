@@ -4,6 +4,7 @@ import MySQLdb as m
 import time
 from envparse import env
 
+
 def get_params(inputFile):
 
     param_dic = {}
@@ -179,7 +180,7 @@ def convert(o):
         return int(o)
 
 
-def update_db(data):
+def _db_connect():
     env.read_envfile('env_config.env')
     db_host = env('DB_HOST')
     db_port = env.int('DB_PORT')
@@ -192,6 +193,10 @@ def update_db(data):
                      port=db_port,
                      passwd=db_pass,
                      db=db_name)
+    return conn
+
+def update_db(data):
+    conn = _db_connect()
     cur = conn.cursor()
 
     cur_date = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -206,8 +211,39 @@ def update_db(data):
     cur.execute(insert_query)
     conn.commit()
     id_ = cur.lastrowid
-    # id_ = ''
     return id_
+
+
+def get_run_results(id):
+    conn = _db_connect()
+    cur = conn.cursor(m.cursors.DictCursor)
+    select_query = f"""
+            SELECT * FROM rundata WHERE id ={id};
+            """
+    cur.execute(select_query)
+    conn.commit()
+    res = cur.fetchall()
+    return res
+
+
+def get_run_history_data(username):
+    conn = _db_connect()
+    cur = conn.cursor(m.cursors.DictCursor)
+    insert_query = f"""
+                SELECT * FROM rundata WHERE creator ='{username}';
+                """
+
+    cur.execute(insert_query)
+    conn.commit()
+    res = cur.fetchall()
+    run_history_df = pd.DataFrame(res)
+    return run_history_df[['name', 'id', 'date', 'status']]
+
+
+
+
+
+
 
 
 

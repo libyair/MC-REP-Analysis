@@ -81,15 +81,15 @@ class CashFlowCalculator(object):
             ## update results
             for i,price in enumerate(self.price_vec):
                 res[f'interset_{str(interest_rate)}_price_{price}'] = { 
-                    'Annual_revenue':self.revenue[i],
-                    'OPEX': tax_calculator.total_expenses,
-                    'Annual_loan_return': annual_loan_return, 
-                    'Annual_interes_return': annual_interes_return,
-                    'Annual_DSRA': annual_DSRA,
-                    'Annual_corp_tax': annual_corp_tax, 
-                    'Delta_working_capital': delta_working_capital[i],
-                    'UpfrontFee_and_Substitute_TaxCapex': UpfrontFee_Substitute_TaxCapex,
-                    'Cash Flow Available for Dividends': annual_cash_flow_i[i]
+                    'Annual_revenue': list(self.revenue[i]),
+                    'OPEX':  list(tax_calculator.total_expenses),
+                    'Annual_loan_return':  list(annual_loan_return),
+                    'Annual_interes_return':  list(annual_interes_return),
+                    'Annual_DSRA':  list(annual_DSRA),
+                    'Annual_corp_tax':  list(annual_corp_tax),
+                    'Delta_working_capital':  list(delta_working_capital[i]),
+                    'UpfrontFee_and_Substitute_TaxCapex':  list(UpfrontFee_Substitute_TaxCapex),
+                    'Cash Flow Available for Dividends':  list(annual_cash_flow_i[i])
 
                     }
                 for key in res[f'interset_{str(interest_rate)}_price_{price}']:

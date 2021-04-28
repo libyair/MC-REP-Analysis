@@ -40,9 +40,7 @@ def get_data(conn, id):
 
 
 def update_error(conn, id, error_dict):
-    print('here1')
     cur = conn.cursor()
-    print('here2')
     error_query = f"""
         UPDATE rundata 
         SET error_message = '{str(error_dict).replace("'", '"')}', status='failed'  
@@ -65,13 +63,17 @@ def update_results(conn, id, results, mc):
             SET results = '{str(results).replace("'", '"')}', status = 'success', MC = {mc}
             WHERE id = {id};
             """
+        print(result_update_query)
         print('result_update_query: ', result_update_query)
         cur.execute(result_update_query)
         conn.commit()
 
-    except Exception as e:
+    except m.OperationalError as e:
         error_dict = {
-            "dev_error": e.replace('"', '').replace("'", ''),
+            "dev_error": str(e).replace('"', '').replace("'", ''),
             "user_error": f"Error saving results for run id {id}"
         }
         raise Exception(error_dict)
+
+
+
